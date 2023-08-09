@@ -9,10 +9,6 @@ from vars import ADMINS
 markup=types.InlineKeyboardMarkup()
 markup.add(types.InlineKeyboardButton("MILLI AI kanali","https://t.me/milliai"))
 
-@bot.middleware_handler(update_types=['message'])
-def register_user(bot_instance,message):
-    ins(message.from_user.id)
-
 @bot.message_handler(content_types=['new_chat_members'])
 def new_chat_members(m):
     for i in m.new_chat_members:
@@ -21,11 +17,12 @@ def new_chat_members(m):
 
 @bot.message_handler(is_subscribed=True,commands=['start'])
 def start(m):
+    ins(m.from_user.id)
     bot.reply_to(m,f"Assalomu alaykum {m.from_user.first_name}! Botdan foydalanish uchun /help buyrug'idan foydalaning.")
 
 @bot.message_handler(is_subscribed=True,commands=['help'])
 def help(m):
-    bot.reply_to(m,"/ask — savollarga javob topishda va ko'plab boshqa muammolarni yechishda yordam beradi. Foydalanish uchun /ask buyrug'i bilan birgalikda xabar kiriting.\nMasalan: ``` /ask Salom milliai!``` \n/photo — rasmlarni osongina yaratish uchun yordam beradi. Foydalanish uchun /photo buyrug'i bilan birgalikda xabarni kiriting.\nMasalan: ``` /photo offisda ishlayotgan mushuk ```\n /stats — Bot statistikasi")
+    bot.reply_to(m,"/ask — savollarga javob topishda va ko'plab boshqa muammolarni yechishda yordam beradi. Foydalanish uchun /ask buyrug'i bilan birgalikda xabar kiriting.\nMasalan: ``` /ask Salom milliai!``` \n/photo — rasmlarni osongina yaratish uchun yordam beradi. Foydalanish uchun /photo buyrug'i bilan birgalikda xabarni kiriting.\nMasalan: ``` /photo offisda ishlayotgan mushuk ```\n /stats — Bot statistikasi\n /contact — Adminlarga xabar yuborish")
 
 @bot.message_handler(is_subscribed=True,commands=['stats'])
 def stats(m):
@@ -33,32 +30,28 @@ def stats(m):
 
 @bot.message_handler(commands=['ad'])
 def ad(m):
-    if m.from_user.id in ADMINS:
+    if str(m.from_user.id) in ADMINS:
         bot.reply_to(m,f"Reklama uchun postni menga yuboring.")
         bot.register_next_step_handler(m,ad2)
 
 def ad2(m):
     for i in get_all():
         try:
-            bot.copy_message(i['user_id'],m.chat.id,m.id)
+            bot.copy_message(i[0],m.chat.id,m.id)
         except Exception as e:
             print(e)
-# @bot.message_handler(is_admin=True,commands=['ban'])
-# def ban(m):
-#     bot.ban_chat_member(m.chat.id,m.reply_to_message.from_user.id)
-#     bot.delete_message(m.chat.id,m.id)
 
-# @bot.message_handler(is_admin=True,content_types=['text'],func=lambda m: m.text.startswith('/mute'))
-# def mute(m):
-#     s=m.text.split()
-#     bot.restrict_chat_member(m.chat.id,m.reply_to_message.from_user.id,time.time()+int(s[1]) if len(s)>0 else None)
-#     bot.delete_message(m.chat.id,m.id)
+@bot.message_handler(commands=['contact'])
+def contact(m):
+    bot.reply_to(m,f"Adminlarga yuborish uchun xabarni kiriting.")
+    bot.register_next_step_handler(m,contact2)
 
-# @bot.message_handler(is_admin=True,content_types=['text'],func=lambda m: m.text.startswith('/unmute'))
-# def unmute(m):
-#     s=m.text.split()
-#     bot.restrict_chat_member(m.chat.id,m.reply_to_message.from_user.id,time.time()+5)
-#     bot.delete_message(m.chat.id,m.id)
+def contact2(m):
+    for i in ADMINS:
+        try:
+            bot.copy_message(i,m.chat.id,m.id)
+        except Exception as e:
+            print(e)
 
 @bot.message_handler(is_subscribed=True,content_types=['text'],func=lambda m: m.text.startswith('/photo'))
 def rasm(m):
